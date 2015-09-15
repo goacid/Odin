@@ -1,0 +1,34 @@
+--- /etc/init.d/named.orig  2015-09-13 10:42:42.000000000 +0200
++++ /etc/init.d/named 2015-09-13 10:50:43.000000000 +0200
+@@ -48,8 +48,23 @@
+/etc/named.dnssec.keys /etc/named.rfc1912.zones /etc/rndc.conf /etc/rndc.key
+/usr/lib64/bind /usr/lib/bind /etc/named.iscdlv.key /etc/named.root.key'
+
++
++copy_to_chroot()
++{
++ echo "NO local mount, it block backups!"
++ echo "Just cp required to chroot : (see list below)"
++ cp -vf /etc/named.iscdlv.key /var/named/chroot/etc/named.iscdlv.key
++ cp -vf /etc/named.root.key /var/named/chroot/etc/
++ cp -vf /etc/named.rfc1912.zones /var/named/chroot/etc/
++}
++
+mount_chroot_conf()
+{
+  + copy_to_chroot
+  +}
+  +
+  +ORIG_mount_chroot_conf()
+  +{
+  if [ -n "$ROOTDIR" ]; then
+    for all in $ROOTDIR_MOUNT; do
+      # Skip nonexistant files
+      @@ -263,6 +278,7 @@
+      p=`pidofnamed`
+      RETVAL=$?
+      if [ "$RETVAL" -eq 0 ]; then 
+        +     copy_to_chroot
+        /usr/sbin/rndc reload >/dev/null 2>&1 || /bin/kill -HUP $p;
+        RETVAL=$?
+      fi
